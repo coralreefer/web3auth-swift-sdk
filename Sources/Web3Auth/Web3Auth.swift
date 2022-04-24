@@ -52,10 +52,33 @@ public class Web3Auth: NSObject {
      - returns: Web3Auth component.
      - important: Calling this method without a valid `Web3Auth.plist` will crash your application.
      */
+    @objc
     public convenience init (_ bundle: Bundle = Bundle.main) {
         let values = plistValues(bundle)!
         self.init(W3AInitParams(clientId: values.clientId, network: values.network))
     }
+    
+    @objc
+    public func login(){
+        var loginParams = W3ALoginParams()
+        Web3Auth()
+            .login(loginParams) {
+                switch $0 {
+                case .success(let result):
+                    print("""
+                        Signed in successfully!
+                            Private key: \(result.privKey)
+                            User info:
+                                Name: \(result.userInfo.name)
+                                Profile image: \(result.userInfo.profileImage ?? "N/A")
+                                Type of login: \(result.userInfo.typeOfLogin)
+                        """)
+                case .failure(let error):
+                    print("Error: \(error)")
+                }
+            }
+    }
+    
     
     /**
      Starts the WebAuth flow by modally presenting a ViewController in the top-most controller.
@@ -78,7 +101,7 @@ public class Web3Auth: NSObject {
              }
          }
      ```
-
+     
      Any on going WebAuth auth session will be automatically cancelled when starting a new one,
      and it's corresponding callback with be called with a failure result of `Web3AuthError.appCancelled`
 
@@ -124,6 +147,17 @@ public class Web3Auth: NSObject {
         }
     }
     
+    public func loginUrl(bundle: String?) -> URL? {
+        let loginParams = W3ALoginParams()
+        guard
+            let bundleId = bundle, //Bundle.main.bundleIdentifier,
+            let redirectURL = URL(string: "\(bundleId)://auth")
+                
+        else { return nil }
+        let url = try? Web3Auth.generateAuthSessionURL(redirectURL: redirectURL, initParams: initParams, loginParams: loginParams)
+        return url!
+    }
+    
     static func generateAuthSessionURL(redirectURL: URL, initParams: W3AInitParams, loginParams: W3ALoginParams) throws -> URL {
         
         var overridenInitParams = initParams
@@ -157,7 +191,7 @@ public class Web3Auth: NSObject {
         return url
     }
     
-    static func decodeStateFromCallbackURL(_ callbackURL: URL) throws -> Web3AuthState {
+    public static func decodeStateFromCallbackURL(_ callbackURL: URL) throws -> Web3AuthState {
         guard
             let callbackFragment = callbackURL.fragment,
             let callbackData = Data.fromBase64URL(callbackFragment),

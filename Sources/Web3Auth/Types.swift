@@ -117,6 +117,15 @@ public struct W3ALoginParams: Encodable {
         self.appState = nil
     }
     
+    public init(loginProvider: Web3AuthProvider?){
+        self.loginProvider = loginProvider?.rawValue
+        self.relogin = nil
+        self.dappShare = nil
+        self.extraLoginOptions = nil
+        self.redirectUrl = nil
+        self.appState = nil
+    }
+    
     public init(loginProvider: Web3AuthProvider?, relogin: Bool? = nil, dappShare: String? = nil, extraLoginOptions: ExtraLoginOptions? = nil, redirectUrl: String? = nil, appState: String? = nil) {
         self.loginProvider = loginProvider?.rawValue
         self.relogin = relogin
