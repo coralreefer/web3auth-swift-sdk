@@ -147,8 +147,9 @@ public class Web3Auth: NSObject {
         }
     }
     
-    public func loginUrl(bundle: String?) -> URL? {
-        let loginParams = W3ALoginParams()
+    @objc
+    public func loginUrl(bundle: String?, provider: String?) -> URL? {
+        let loginParams = W3ALoginParams(loginProvider: Web3AuthProvider.init(rawValue: provider ?? "google"))
         guard
             let bundleId = bundle, //Bundle.main.bundleIdentifier,
             let redirectURL = URL(string: "\(bundleId)://auth")
